@@ -226,7 +226,7 @@ def get_authors_with_expensive_books(request: HttpRequest) -> HttpResponse:
 def get_publisher_by_id(request: HttpRequest, publisher_id: int) -> HttpResponse:
     if not (publisher := Publisher.objects.filter(id=publisher_id).first()):
         return HttpResponseNotFound(
-            f'<h2>Book by id {publisher_id} not found</h2>'
+            f'<h2>Publisher by id {publisher_id} was not found</h2>'
         )
 
     book_s = publisher.books.all()
@@ -237,8 +237,29 @@ def get_publisher_by_id(request: HttpRequest, publisher_id: int) -> HttpResponse
     )
 
 def get_store_by_id(request: HttpRequest, store_id: int) -> HttpResponse:
-    pass
+    if not (store := Store.objects.filter(id=store_id).first()):
+        return HttpResponseNotFound(
+            f'<h2>The store by id {store_id} was not found</h2>'
+        )
+
+    book_s = store.books.all()
+    book_s = "<h2><p>".join([str(b) for b in book_s])
+    logger.debug(book_s)
+    return HttpResponse(
+        f"<h1>Found store: {store},<hr> Books: <h2>{book_s}</h1>"
+    )
+
 
 
 def get_author_by_id(request: HttpRequest, author_id: int) -> HttpResponse:
-    pass
+    if not (author := Author.objects.filter(id=author_id).first()):
+        return HttpResponseNotFound(
+            f'<h2>The author by id {author_id} was not found</h2>'
+        )
+
+    book_s = author.books.all()
+    book_s = "<h2><p>".join([str(b) for b in book_s])
+    logger.debug(book_s)
+    return HttpResponse(
+        f"<h1>Found author: {author},<hr> Books: <h2>{book_s}</h1>"
+    )
