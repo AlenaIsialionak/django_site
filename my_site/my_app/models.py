@@ -69,10 +69,6 @@ class Book(models.Model):
     authors = models.ManyToManyField(Author)
 
     class Meta:
-<<<<<<< HEAD
-
-=======
->>>>>>> e58c06c (lesson)
         default_related_name = 'books'
 
     def __str__(self):

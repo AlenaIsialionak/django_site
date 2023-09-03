@@ -80,10 +80,7 @@ WSGI_APPLICATION = 'my_site.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-<<<<<<< HEAD
-=======
 
->>>>>>> e58c06c (lesson)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',

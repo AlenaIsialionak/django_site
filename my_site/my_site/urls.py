@@ -20,7 +20,4 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('my_app/', include('my_app.urls'))
 ]
-<<<<<<< HEAD
 
-=======
->>>>>>> e58c06c (lesson)

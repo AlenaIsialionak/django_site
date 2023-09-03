@@ -4,11 +4,6 @@ import functools
 
 
 def query_debugger(logger):
-
-<<<<<<< HEAD
-
-=======
->>>>>>> e58c06c (lesson)
     def wrapper(func):
 
         print("Hello from decorator!")
