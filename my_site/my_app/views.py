@@ -6,6 +6,7 @@ from django.http import HttpResponse, HttpRequest, HttpResponseNotFound
 from my_app.models import Book, Store, Author, Publisher
 from my_app.utils import query_debugger
 from django.db.models import Prefetch, Subquery
+from django.shortcuts import render
 
 logging.basicConfig(
     format="%(asctime)s.%(msecs)03d %(levelname)s "
@@ -133,7 +134,7 @@ def _get_all_publishers():
     return publishers_with_books
 
 
-@query_debugger(django_logger)
+@query_debugger(logger)
 def _get_publishers_with_expensive_books():
     """
     Lesson 4: SubQuery example
@@ -152,7 +153,7 @@ def _get_publishers_with_expensive_books():
 
     return [item for item in publishers_with_expensive_books.values()]
 
-@query_debugger(django_logger)
+@query_debugger(logger)
 def _get_expensive_books():
 
     expensive_books = Book.objects.filter(price__gte=200).order_by('-price')
@@ -205,7 +206,7 @@ def get_book_by_id(request: HttpRequest, book_id: int) -> HttpResponse:
 
 
 def hello(request: HttpRequest) -> HttpResponse:
-    return HttpResponse(f"Hello World!")
+    return render(request, 'index.html')
 
 
 # HOMEWORK
@@ -263,3 +264,84 @@ def get_author_by_id(request: HttpRequest, author_id: int) -> HttpResponse:
     return HttpResponse(
         f"<h1>Found author: {author},<hr> Books: <h2>{book_s}</h1>"
     )
+
+#---------- Lesson DJANGO TEMPLATES -----------
+
+def hello_v2(request: HttpRequest) -> HttpResponse:
+    """
+    Lesson "Django Templates"
+    """
+    return render(request, "index.html")
+
+
+def get_first_three_books(request: HttpRequest) -> HttpResponse:
+    """
+    Lesson "Django Templates"
+    """
+    keys = ('book1', 'book2', 'book3')
+    not_found = 'Not Found'
+
+    match _get_all_books()[:3]:
+        case book1, book2, book3:
+            context = dict(zip(keys, (book1, book2, book3)))
+        case book1, book2:
+            context = dict(zip(keys, (book1, book2, not_found)))
+        case book1, *_:
+            context = dict(zip(keys, (book1, not_found, not_found)))
+        case _:
+            context = dict.fromkeys(keys, not_found)
+
+    return render(
+        request,
+        "books1.html",
+        context=context
+    )
+
+
+def get_all_books_v2(request: HttpRequest) -> HttpResponse:
+    """
+    Lesson "Django Templates"
+    """
+    books_list = _get_all_books()
+
+    return render(
+        request,
+        "books2.html",
+        context={
+            'books': books_list
+        }
+    )
+
+
+# ---------- Lesson DJANGO TEMPLATES: HOMEWORK ----------- #
+
+@query_debugger(logger)
+def _get_only_books_with_authors():
+    queryset = Book.objects.prefetch_related(
+        Prefetch(
+            'authors',
+            queryset=Author.objects.all()
+        )
+    )
+
+    books = []
+    for book in queryset:
+        books_filtered = book.authors.all()
+        authors = [(author.first_name, author.last_name) for author in books_filtered]
+        if authors:
+            books.append({'name': book.name, 'authors': authors})
+
+    return books
+
+def get_only_books_with_authors(request: HttpRequest) -> HttpResponse:
+    books_list = _get_only_books_with_authors()
+    logger.debug(books_list)
+    return render(
+        request,
+        "books2.html",
+        context={
+            'books': books_list
+        }
+    )
+
+
