@@ -4,7 +4,10 @@ from django.urls import path
 
 from . import views
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> e58c06c (lesson)
 urlpatterns = [
     path('hello', views.hello),
     path('books', views.get_all_books),

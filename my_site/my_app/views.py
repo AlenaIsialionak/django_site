@@ -236,6 +236,10 @@ def get_publisher_by_id(request: HttpRequest, publisher_id: int) -> HttpResponse
         f"<h1>Found publisher: {publisher},<hr> Books: <h2>{book_s}</h1>"
     )
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> e58c06c (lesson)
 def get_store_by_id(request: HttpRequest, store_id: int) -> HttpResponse:
     pass
 
