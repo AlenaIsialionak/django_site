@@ -3,10 +3,11 @@ import logging
 import sys
 
 from django.http import HttpResponse, HttpRequest, HttpResponseNotFound
-from my_app.models import Book, Store, Author, Publisher
+from my_app.models import Book, Store, Author, Publisher, User
 from my_app.utils import query_debugger
 from django.db.models import Prefetch, Subquery
 from django.shortcuts import render
+from my_app.forms import UserForm, PublisherForm, BookForm
 
 logging.basicConfig(
     format="%(asctime)s.%(msecs)03d %(levelname)s "
@@ -343,5 +344,99 @@ def get_only_books_with_authors(request: HttpRequest) -> HttpResponse:
             'books': books_list
         }
     )
+
+def get_user_form(request: HttpRequest):
+    form = UserForm()
+    return render(
+        request,
+        'user_forms.html',
+        context={'form': form}
+    )
+
+def _add_user(user:dict):
+
+    user_dict = User.objects.create(
+        name=user.get('name') or 'default_name',
+        age=user.get('age') or 18,
+        gender=user.get('gender') or 'female',
+        nationality=user.get('nationality') or 'belarus'
+    )
+    return user_dict
+def add_user(request: HttpRequest):
+    rq_data = request.POST
+    user_data = {
+        'name': rq_data.get('name'),
+        'age': rq_data.get('age'),
+        'gender': rq_data.get('gender'),
+        'nationality': rq_data.get('nationality')
+    }
+    user = _add_user(user_data)
+
+    return HttpResponse(f'User: {user}')
+
+
+def get_publisher_form(request: HttpRequest):
+    form = PublisherForm()
+    return render(
+        request,
+        'publisher_forms.html',
+        context={'form': form}
+    )
+
+def _add_publisher(publisher:dict):
+    name_ = publisher.get('name')
+    if p := Publisher.objects.filter(name=name_):
+        return None
+    publisher_dict = Publisher.objects.create(
+        name=name_ or 'default_name')
+    return publisher_dict
+
+
+def add_publisher(request: HttpRequest):
+    rq_data = request.POST
+    publisher_data = {
+        'name': rq_data.get('name'),
+    }
+    publisher = _add_publisher(publisher_data)
+    if publisher:
+        return HttpResponse(f'Publisher: {publisher}')
+    else:
+        return HttpResponse(f"Publisher with  name {publisher_data.get('name')} already exists!")
+
+
+def get_book_form(request: HttpRequest):
+    form = BookForm()
+    return render(
+        request,
+        'book_forms.html',
+        context={'form': form}
+    )
+
+
+def _add_book(book: dict):
+    name_ = book.get('name_publisher')
+    if not Publisher.objects.filter(name=name_):
+        publisher = Publisher.objects.create(name=name_)
+    publisher_ = Publisher.objects.get(name=name_)
+    book_dict = Book.objects.create(
+        name=book.get('name') or 'default_title',
+        price=book.get('price') or 0,
+        publisher=publisher_ or 'default_name')
+
+    return book_dict
+
+
+def add_book(request: HttpRequest):
+    rq_data = request.POST
+    book_data = {
+        'name': rq_data.get('name'),
+        'price': rq_data.get('price'),
+        'name_publisher': rq_data.get('name_publisher')
+    }
+    book = _add_book(book_data)
+
+    return HttpResponse(f'Book: {book}')
+
+
 
 
